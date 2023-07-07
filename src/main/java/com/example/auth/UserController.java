@@ -1,5 +1,6 @@
 package com.example.auth;
 
+import com.example.auth.entity.CustomUserDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,9 +33,13 @@ public class UserController {
     public String myProfile(
             Authentication authentication
     ) {
-        log.info(authentication.getName());
-        log.info(((User) authentication.getPrincipal()).getUsername());
-        log.info(SecurityContextHolder.getContext().getAuthentication().getName());
+//        log.info(authentication.getName());
+//        log.info(((User) authentication.getPrincipal()).getUsername());
+        CustomUserDetails userDetails
+                = (CustomUserDetails) authentication.getPrincipal();
+        log.info(userDetails.getUsername());
+        log.info(userDetails.getEmail());
+//        log.info(SecurityContextHolder.getContext().getAuthentication().getName());
         return "my-profile";
     }
 
@@ -71,8 +76,14 @@ public class UserController {
         if (password.equals(passwordCheck)) {
             log.info("password match !!");
 
+//            manager.createUser(
+//                    User.withUsername(username)
+//                            .password(passwordEncoder.encode(password))
+//                            .build()
+//            );
             manager.createUser(
-                    User.withUsername(username)
+                    CustomUserDetails.builder()
+                            .username(username)
                             .password(passwordEncoder.encode(password))
                             .build()
             );

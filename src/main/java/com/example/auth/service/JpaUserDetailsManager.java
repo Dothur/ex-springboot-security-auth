@@ -1,5 +1,6 @@
 package com.example.auth.service;
 
+import com.example.auth.entity.CustomUserDetails;
 import com.example.auth.entity.UserEntity;
 import com.example.auth.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +26,14 @@ public class JpaUserDetailsManager implements UserDetailsManager {
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
-        createUser(User.withUsername("user")
+//        createUser(User.withUsername("user")
+//                .password(passwordEncoder.encode("asdf"))
+//                .build()
+//        );
+        createUser(CustomUserDetails.builder()
+                .username("user")
                 .password(passwordEncoder.encode("asdf"))
+                .email("user@gmail.com")
                 .build()
         );
     }
@@ -40,9 +47,10 @@ public class JpaUserDetailsManager implements UserDetailsManager {
         if (optionalUser.isEmpty())
             throw new UsernameNotFoundException(username);
         UserEntity userEntity = optionalUser.get();
-        return User.withUsername(userEntity.getUsername())
-                .password(userEntity.getPassword())
-                .build();
+//        return User.withUsername(userEntity.getUsername())
+//                .password(userEntity.getPassword())
+//                .build();
+        return CustomUserDetails.fromEntity(userEntity);
     }
 
     @Override
@@ -52,10 +60,16 @@ public class JpaUserDetailsManager implements UserDetailsManager {
         // 사용자가 (이미) 있으면 생성할수 없다.
         if (this.userExists(user.getUsername()))
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUsername(user.getUsername());
-        userEntity.setPassword(user.getPassword());
-        this.userRepository.save(userEntity);
+//        UserEntity userEntity = new UserEntity();
+//        userEntity.setUsername(user.getUsername());
+//        userEntity.setPassword(user.getPassword());
+//        this.userRepository.save(userEntity);
+        try {
+            userRepository.save(((CustomUserDetails) user).newEntity());
+        } catch (ClassCastException e){
+            log.error("failed to cast to {}", CustomUserDetails.class);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Override

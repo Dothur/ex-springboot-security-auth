@@ -79,7 +79,7 @@ public class WebSecurityConfig {
         return http.build();
     }
 
-    @Bean
+//    @Bean
     // 사용자 관리를 위한 인터페이스 구현체 Bean
     public UserDetailsManager userDetailsManager(
             PasswordEncoder passwordEncoder
